@@ -1,4 +1,6 @@
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using System.Reflection;
 using TheSouq.Api;
 using TheSouq.Api.Common.Mapping;
@@ -24,6 +26,14 @@ builder.Services.Configure<CloudainrySettings>(builder.Configuration.GetSection(
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+//Add Hangfire for background jobs
+builder.Services.AddHangfire(x => x.UseSqlServerStorage(connectionString));
+builder.Services.AddHangfireServer();
+
+//Add Serilog
+Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(builder.Configuration).CreateLogger();
+builder.Host.UseSerilog();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -36,6 +46,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.UseHangfireDashboard("/hangfire");
 
 app.MapControllers();
 

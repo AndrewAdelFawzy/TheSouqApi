@@ -117,9 +117,11 @@ namespace TheSouq.EF.Repositories
 			return await _context.Set<T>().CountAsync(criteria);
 		}
 
-		Task<T> IBaseRepository<T>.Update(T entity)
+		async Task<T> IBaseRepository<T>.UpdateAsync(T entity)
 		{
-			throw new NotImplementedException();
+			 _context.Update<T>(entity);
+			await _context.SaveChangesAsync();
+			return  entity;
 		}
 
 		public int Count()

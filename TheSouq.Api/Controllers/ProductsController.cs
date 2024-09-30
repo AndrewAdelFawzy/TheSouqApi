@@ -1,5 +1,6 @@
 ﻿using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
+using Hangfire;
 using Microsoft.Extensions.Options;
 using System.Drawing;
 using TheSouq.Core.Enities;
@@ -49,6 +50,7 @@ namespace TheSouq.Api.Controllers
 		[HttpGet("{id}")]
 		public async Task<IActionResult> GetByIdAsync(int id)
 		{
+
 			var product = await _unitOfWork.Products.FindAsync(p => p.Id == id, new[] {"Size","Category","Color"});
 
 			if (product is null)
@@ -60,17 +62,17 @@ namespace TheSouq.Api.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> AddProductAsync([FromForm]ProductFormDto Dto)
+		public async Task<IActionResult> AddProductAsync([FromForm]ProductFormDto dto)
 		{
 
 			
-			var product = _mapper.Map<Product>(Dto);
+			var product = _mapper.Map<Product>(dto);
 
-			if (Dto.Image is not null)
+			if (dto.Image is not null)
 			{
-				var extention = Path.GetExtension(Dto.Image.FileName);
+				var extention = Path.GetExtension(dto.Image.FileName);
 
-				if (Dto.Image.Length > _maxAllowedSize)
+				if (dto.Image.Length > _maxAllowedSize)
 					return BadRequest("Image sholud be less than or equal 2 MB");
 
 				if (!_allowedExtentions.Contains(extention))
@@ -78,16 +80,20 @@ namespace TheSouq.Api.Controllers
 
 				var ImageName = $"{Guid.NewGuid()}{extention}";
 
-				using var stream = Dto.Image.OpenReadStream();
+				using var stream = dto.Image.OpenReadStream();
 
 				var imageParams = new ImageUploadParams
 				{
 					File = new FileDescription(ImageName, stream)
 				};
 
+				//BackgroundJob.Enqueue(() =>  // the function is here );
+				//TODO:sending emails in background to improve preformence
+
 				var result = await _cloudainry.UploadAsync(imageParams);
 
 				product.ImageUrl = result.SecureUrl.ToString();
+				product.ImagePublicId = result.PublicId;
 			}
 
 			product.IsDeleted = false;
@@ -105,6 +111,60 @@ namespace TheSouq.Api.Controllers
 
 		}
 
+		[HttpPut("{id}")]
+		public async Task<IActionResult> UpdateProductAsync(int id,[FromForm] ProductFormDto dto)
+		{
+			var product = await _unitOfWork.Products.GetByIdAsync(id);
+
+			if (product is null)
+				return NotFound();
+
+			if (dto.Image is not null)
+			{
+				var extention = Path.GetExtension(dto.Image.FileName);
+
+				if (dto.Image.Length > _maxAllowedSize)
+					return BadRequest("Image sholud be less than or equal 2 MB");
+
+				if (!_allowedExtentions.Contains(extention))
+					return BadRequest("allowed extentsions are : \".jpg\", \".png\", \".jpeg\" ");
+
+				var ImageName = $"{Guid.NewGuid()}{extention}";
+
+				using var stream = dto.Image.OpenReadStream();
+
+				var imageParams = new ImageUploadParams
+				{
+					File = new FileDescription(ImageName, stream)
+				};
+
+				var result = await _cloudainry.UploadAsync(imageParams);
+
+				if(!string.IsNullOrEmpty(result.SecureUrl.ToString()))
+				{
+					await _cloudainry.DeleteResourcesAsync(product.ImagePublicId);
+
+					product.ImageUrl = result.SecureUrl.ToString();
+					product.ImagePublicId = result.PublicId;
+				}	
+
+				product.ImageUrl = result.SecureUrl.ToString();
+				product.ImagePublicId = result.PublicId;
+			}
+
+			product.IsDeleted = false;
+			product.UpdatedAt = DateTime.UtcNow;
+
+			product = _mapper.Map(dto, product);
+
+			await _unitOfWork.Products.UpdateAsync(product);
+
+			_unitOfWork.Commit();
+
+			return Ok("Updated");
+
+		}
+
 
 		[HttpDelete("{id}")]
 		public IActionResult Delete(int id)
@@ -114,7 +174,10 @@ namespace TheSouq.Api.Controllers
 			if (product is null)
 				return NotFound();
 
+			_cloudainry.DeleteResources(product.ImagePublicId);
+
 			var productDto = _mapper.Map<ProductDto>(product);
+
 
 			_unitOfWork.Products.Delete(product);
 			_unitOfWork.Commit();

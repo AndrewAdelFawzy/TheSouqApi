@@ -8,7 +8,6 @@ namespace TheSouq.Api.Common.DTOS
 		public string Title { get; set; } = null!;
 		public IFormFile? Image { get; set; }
 		public double Price { get; set; }
-
 		[MaxLength(500)]
 		public string Description { get; set; } = null!;
 		public byte SizeId { get; set; } 
