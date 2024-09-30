@@ -15,7 +15,7 @@ namespace TheSouq.Core.Interfaces
 			Expression<Func<T, object>> orderBy = null, string orderByDirection = OrderBy.Ascending);
 		Task<T> AddAsync(T entity);
 		Task<IEnumerable<T>> AddRangeAsync(IEnumerable<T> entities);
-		Task<T> Update(T entity);
+		Task<T> UpdateAsync(T entity);
 		void Delete(T entity);
 		void DeleteRange(IEnumerable<T> entities);
 		int Count();

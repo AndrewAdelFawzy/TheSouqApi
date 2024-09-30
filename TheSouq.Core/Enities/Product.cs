@@ -16,6 +16,7 @@ namespace TheSouq.Core.Enities
 		public byte ColorId { get; set; }
 		public Color Color { get; set; } = null!;
 		public string? ImageUrl { get; set; }
+		public string? ImagePublicId { get; set; }
 		public byte CategoryId { get; set; }
 		public Category Category { get; set; } = null!;
 	}
