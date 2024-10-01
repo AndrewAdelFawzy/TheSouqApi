@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TheSouq.EF;
 
@@ -11,9 +12,10 @@ using TheSouq.EF;
 namespace TheSouq.EF.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241001083758_addIdentity")]
+    partial class addIdentity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -258,9 +260,6 @@ namespace TheSouq.EF.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreatedById")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -271,17 +270,10 @@ namespace TheSouq.EF.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UpdatedById")
-                        .HasColumnType("nvarchar(450)");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("CreatedById");
 
                     b.HasIndex("Name")
                         .IsUnique();
-
-                    b.HasIndex("UpdatedById");
 
                     b.ToTable("Categories");
                 });
@@ -323,9 +315,6 @@ namespace TheSouq.EF.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreatedById")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(500)
@@ -354,20 +343,13 @@ namespace TheSouq.EF.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UpdatedById")
-                        .HasColumnType("nvarchar(450)");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
 
                     b.HasIndex("ColorId");
 
-                    b.HasIndex("CreatedById");
-
                     b.HasIndex("SizeId");
-
-                    b.HasIndex("UpdatedById");
 
                     b.ToTable("Products");
                 });
@@ -443,21 +425,6 @@ namespace TheSouq.EF.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("TheSouq.Core.Enities.Category", b =>
-                {
-                    b.HasOne("TheSouq.Core.Enities.ApplicationUser", "CreatedBy")
-                        .WithMany()
-                        .HasForeignKey("CreatedById");
-
-                    b.HasOne("TheSouq.Core.Enities.ApplicationUser", "UpdatedBy")
-                        .WithMany()
-                        .HasForeignKey("UpdatedById");
-
-                    b.Navigation("CreatedBy");
-
-                    b.Navigation("UpdatedBy");
-                });
-
             modelBuilder.Entity("TheSouq.Core.Enities.Product", b =>
                 {
                     b.HasOne("TheSouq.Core.Enities.Category", "Category")
@@ -472,29 +439,17 @@ namespace TheSouq.EF.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TheSouq.Core.Enities.ApplicationUser", "CreatedBy")
-                        .WithMany()
-                        .HasForeignKey("CreatedById");
-
                     b.HasOne("TheSouq.Core.Enities.Size", "Size")
                         .WithMany("Products")
                         .HasForeignKey("SizeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TheSouq.Core.Enities.ApplicationUser", "UpdatedBy")
-                        .WithMany()
-                        .HasForeignKey("UpdatedById");
-
                     b.Navigation("Category");
 
                     b.Navigation("Color");
 
-                    b.Navigation("CreatedBy");
-
                     b.Navigation("Size");
-
-                    b.Navigation("UpdatedBy");
                 });
 
             modelBuilder.Entity("TheSouq.Core.Enities.Category", b =>

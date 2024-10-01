@@ -1,14 +1,19 @@
 using Hangfire;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System.Reflection;
 using TheSouq.Api;
 using TheSouq.Api.Common.Mapping;
+using TheSouq.Core.Enities;
+using TheSouq.Core.Seeds;
 using TheSouq.EF;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -46,6 +51,14 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+var scopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
+using var scope = scopeFactory.CreateScope();
+
+var RoleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+var UserManager = scope.ServiceProvider.GetService<UserManager<ApplicationUser>>();
+
+await DefaultRoles.SeedRoles(RoleManager);
 
 app.UseHangfireDashboard("/hangfire");
 
