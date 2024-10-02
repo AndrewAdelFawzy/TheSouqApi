@@ -1,15 +1,17 @@
 ﻿using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Hangfire;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
-using System.Drawing;
+using TheSouq.Core.Common.DTOS;
 using TheSouq.Core.Enities;
-using static System.Net.Mime.MediaTypeNames;
+
 
 namespace TheSouq.Api.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
+	[Authorize(Roles =AppRoles.User)]
 	public class ProductsController : ControllerBase
 	{
 		private readonly IUnitOfWork _unitOfWork;

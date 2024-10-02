@@ -1,7 +1,6 @@
 ﻿using TheSouq.Core.Enities;
-using TheSouq.Core.Interfaces;
 
-namespace TheSouq.Api
+namespace TheSouq.Core.Interfaces
 {
 	public interface IUnitOfWork:IDisposable
 	{

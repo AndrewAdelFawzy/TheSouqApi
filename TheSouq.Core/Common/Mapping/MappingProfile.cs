@@ -1,7 +1,8 @@
-﻿using TheSouq.Api.Common.DTOS;
+﻿using AutoMapper;
+using TheSouq.Core.Common.DTOS;
 using TheSouq.Core.Enities;
 
-namespace TheSouq.Api.Common.Mapping
+namespace TheSouq.Core.Common.Mapping
 {
 	public class MappingProfile:Profile
 	{

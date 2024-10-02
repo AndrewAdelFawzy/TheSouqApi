@@ -1,6 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Http;
+using System.ComponentModel.DataAnnotations;
 
-namespace TheSouq.Api.Common.DTOS
+namespace TheSouq.Core.Common.DTOS
 {
 	public class ProductFormDto
 	{

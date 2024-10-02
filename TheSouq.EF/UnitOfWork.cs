@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TheSouq.Api;
-using TheSouq.Core.Enities;
+﻿using TheSouq.Core.Enities;
 using TheSouq.Core.Interfaces;
 using TheSouq.EF.Repositories;
 
