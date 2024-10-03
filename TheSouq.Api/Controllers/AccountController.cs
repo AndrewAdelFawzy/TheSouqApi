@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using TheSouq.Core.Common.DTOS;
 using TheSouq.Core.Services;
 
@@ -11,12 +13,12 @@ namespace TheSouq.Api.Controllers
 	public class AccountController : ControllerBase
 	{
 		private readonly IAuthService _authService;
-		private readonly IEmailSender _emailSender;
+	
 
-		public AccountController(IAuthService authService, IEmailSender emailSender) 
+		public AccountController(IAuthService authService) 
 		{
 			_authService = authService;
-			_emailSender = emailSender;
+			
 		}
 
 		[HttpPost("register")]
@@ -37,6 +39,30 @@ namespace TheSouq.Api.Controllers
 			var result = await _authService.ConfirmEmailAsync(userId,token);
 			return Ok(result);
 		}
+
+
+		[HttpPost("changePassword")]
+		[Authorize]
+		public async Task<IActionResult> ChangePasswordAsync([FromForm]ChangePasswordDto dto)
+		{
+			var userId = User.FindFirst("uid")?.Value;
+
+			if (userId is null)
+				return Unauthorized("user not found or not authenticated");
+
+			var result = await _authService.ChangePasswordAsync(userId, dto);
+
+			if (!result.Succeeded)
+			{
+				var errors = result.Errors.Select(e => e.Description);
+				return BadRequest(new { message = "Password change failed.", errors });
+			}
+
+			return Ok("Password changed successfully.");
+		}
+
+
+
 
 		[HttpPost("Login")]
 		public async Task<IActionResult> LoginAsync([FromForm] LoginDto dto)

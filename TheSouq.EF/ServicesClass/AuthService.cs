@@ -1,7 +1,6 @@
-﻿using CloudinaryDotNet;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -29,6 +28,16 @@ namespace TheSouq.EF.ServicesClass
 			_jwt = jwt.Value;
 			_roleManager = roleManager;
 			_emailSender = emailSender;
+		}
+
+		public async Task<IdentityResult> ChangePasswordAsync(string userId, ChangePasswordDto dto)
+		{
+			var user = await _userManager.FindByIdAsync(userId);
+
+			if (user is null)
+				return IdentityResult.Failed(new IdentityError { Description = "User not found." });
+
+			return await _userManager.ChangePasswordAsync(user,dto.CurrentPassword,dto.NewPassword);
 		}
 
 		public async Task<AuthDto> LoginAsync(LoginDto dto)
@@ -143,7 +152,8 @@ namespace TheSouq.EF.ServicesClass
 				new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
 				new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
 				new Claim(JwtRegisteredClaimNames.Email, user.Email),
-				new Claim("uid", user.Id)
+				new Claim("uid", user.Id),
+				
 			}
 			.Union(userClaims)
 			.Union(roleClaims);
@@ -160,5 +170,7 @@ namespace TheSouq.EF.ServicesClass
 
 			return jwtSecurityToken;
 		}
+
+		
 	}
 }
